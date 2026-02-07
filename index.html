@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>The Solar System - Science Game</title>
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/icono.ico">
+    <style>
+        /* ====== Reset & base ====== */
+        * { box-sizing: border-box; margin:0; padding:0; }
+        :root{
+            --blue:#001DFF;
+            --blue-dark:#04032B; 
+            --blue-700:#1a3a5f;
+            --blue-600:#254fba;
+            --orange:#f59e42;
+            --orange-700:#e67e22;
+            --bg-grad-1:#1a3a5f;
+            --bg-grad-2:#0d2340;
+            --white:#ffffff;
+            --green:#2ecc71;
+            --red:#e74c3c;
+            --panel:#E8EAFF;
+        }
+        body{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* --- Contenedor Principal --- */
+        .app-container {
+            background-color: var(--white);
+            width: 100%;
+            max-width: 900px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        /* --- Pantallas --- */
+        .screen { display: none; padding: 2rem; flex-direction: column; align-items: center; text-align: center; }
+        .screen.active { display: flex; }
+
+        /* --- Tipografía y Títulos --- */
+        h1 { color: var(--blue-dark); font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 800; }
+        h2 { color: var(--blue-dark); font-size: 1.3rem; margin-bottom: 1.5rem; }
+        .instruction-box { background: var(--panel); padding: 1.5rem; border-radius: 15px; margin-bottom: 1rem; width: 100%; }
+        .instruction-box p { font-size: 1.1rem; line-height: 1.4; color: #444; }
+        .highlight-orange { color: var(--orange); font-weight: bold; }
+        .good-luck { display: block; margin-top: 1rem; font-weight: bold; font-size: 1.4rem; text-align: center; }
+
+        /* --- Botones --- */
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary { background-color: var(--orange); color: white; box-shadow: 0 4px 15px rgba(245,158,66,0.4); }
+        .btn-primary:hover { background-color: var(--orange-700); transform: translateY(-3px); }
+        .btn-ghost { background: transparent; color: var(--blue-700); border: 2px solid var(--blue-700); margin-left: 10px; }
+
+        /* --- Imagen Decorativa Inicio --- */
+        .intro-img { width: 100%; max-width: 400px; margin-top: 20px; }
+
+        /* --- Barra de Progreso --- */
+        .progress-container { width: 100%; background: #eee; height: 12px; border-radius: 6px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: var(--orange); transition: width 0.3s ease; }
+
+        /* --- Juego 2: Interactive Map --- */
+        .game-area { position: relative; width: 100%; max-width: 100%; margin: 0 auto; line-height: 0; }
+        .base-img { width: 100%; height: auto; display: block; border-radius: 8px; border: 2px solid #ddd; }
+        
+        .click-zone {
+            position: absolute;
+            border: 2px solid #000;
+            background-color: #fff;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .click-zone.correct { background-color: var(--green) !important; }
+        .click-zone.wrong { background-color: var(--red) !important; }
+
+        .btn-play-word {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--blue-600);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 15px auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .btn-play-word:hover { transform: scale(1.1); }
+        .btn-play-word svg { fill: white; width: 25px; height: 25px; margin-left: 3px; }
+
+        /* --- Pantalla Final --- */
+        .score-big { font-size: 5rem; font-weight: 900; color: var(--blue-dark); margin: 10px 0; }
+        .trophy { font-size: 4rem; margin-bottom: 10px; }
+        .final-msg { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; }
+        .time-label { font-size: 1.1rem; color: #666; margin-bottom: 20px; }
+        .school-logo { max-width: 150px; margin-top: 20px; background: transparent; }
+
+        /* --- Hall of Fame --- */
+        .hall-of-fame { background: var(--panel); border-radius: 12px; padding: 1rem; margin-top: 1.5rem; width: 100%; max-width: 600px; }
+        .hall-of-fame-title { color: var(--blue-700); font-weight: 800; font-size: 1.2rem; text-align: center; margin-bottom: 0.8rem; }
+        .hall-of-fame-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .hall-of-fame-table th { background: var(--blue-600); color: white; padding: 0.5rem; text-align: left; }
+        .hall-of-fame-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid #ddd; text-align: left; }
+        .hall-of-fame-table tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.5); }
+        .hall-of-fame-loading, .hall-of-fame-error { text-align: center; padding: 10px; color: var(--blue-700); }
+
+        /* --- Modal --- */
+        #submitModal {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:1000;
+        }
+        .modal-content { background: white; padding: 2rem; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; }
+        .modal-content input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+
+        /* --- Controls --- */
+        .top-controls { position: absolute; top: 10px; right: 10px; z-index: 100; }
+        .control-btn { background: rgba(255,255,255,0.8); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; }
+
+        /* --- Confeti --- */
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 999; pointer-events: none; }
+
+        @keyframes fall {
+            to { transform: translateY(var(--ty)) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="top-controls">
+            <button id="muteBtn" class="control-btn">🔊</button>
+        </div>
+
+        <section id="startScreen" class="screen active">
+            <h1>The solar system</h1>
+            <h2>Identify the components of the solar system: Sun, planets, satellites, comets and asteroids.</h2>
+            <div class="instruction-box">
+                <p>Listen to the audio and identify the components of the <span class="highlight-orange">solar system</span>. Press the play button to listen again.</p>
+                <span class="good-luck">Good luck!</span>
+            </div>
+            
+            <button id="playBtn" class="btn btn-primary">Play</button>
+
+            <div class="hall-of-fame" id="hallOfFame">
+                <div class="hall-of-fame-title">🏆 Mejores puntuaciones 🏆</div>
+                <table class="hall-of-fame-table">
+                    <thead>
+                        <tr>
+                            <th>Posición</th>
+                            <th>Nombre</th>
+                            <th>Puntos</th>
+                            <th>Tiempo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hofTableBody"></tbody>
+                </table>
+            </div>
+
+            <img src="https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Ni%C3%B1os.png" class="intro-img" alt="Kids">
+        </section>
+
+        <section id="gameScreen" class="screen">
+            <h1>Identify the components of the solar system</h1>
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+
+            <div class="game-area" id="gameArea">
+                <img src="https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Solar_system.png" id="solarImg" class="base-img">
+                </div>
+
+            <button id="playWordBtn" class="btn-play-word">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+        </section>
+
+        <section id="endScreen" class="screen">
+            <h1>The solar system</h1>
+            <div id="trophyContainer" class="trophy">🏆</div>
+            <p style="font-size: 1.2rem;">Score:</p>
+            <div id="finalScore" class="score-big">0</div>
+            <p id="finalMessage" class="final-msg"></p>
+            <p id="finalTime" class="time-label"></p>
+            <p style="margin-bottom: 10px;">Created by Manuel J. Ventura</p>
+            <img src="https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Siurot.png" class="school-logo" alt="School Logo">
+            <br>
+            <button id="backToMenuBtn" class="btn btn-primary" style="margin-top: 20px;">Back to menu</button>
+        </section>
+    </div>
+
+    <div id="submitModal">
+        <div class="modal-content">
+            <h3>¡Juego Terminado!</h3>
+            <p>Tiempo: <span id="modalTime"></span></p>
+            <input type="text" id="playerName" placeholder="Nombre" maxlength="15">
+            <input type="text" id="playerSurname" placeholder="Apellido" maxlength="15">
+            <div style="margin-top: 20px;">
+                <button id="submitScoreBtn" class="btn btn-primary">Enviar</button>
+                <button id="discardScoreBtn" class="btn btn-ghost">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* --- CONFIGURACIÓN HOF --- */
+    const SHEET_NAME = "Solar_system";
+    const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzunJPNdm7uXAmQCTU4d4Cll0xPJ0Jl-XUKxf_R_o95o6NcZONdhUpdYYUpK5yYIacHog/exec";
+    
+    /* --- DATOS DEL JUEGO --- */
+    const gameData = [
+        { name: "Sun", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Sun.mp3", coords: [12, 568, 116, 668] },
+        { name: "Mercury", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Mercury.mp3", coords: [81, 799, 186, 901] },
+        { name: "Venus", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Venus.mp3", coords: [299, 776, 404, 879] },
+        { name: "Earth", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Earth.mp3", coords: [424, 555, 529, 657] },
+        { name: "Mars", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Mars.mp3", coords: [279, 409, 384, 511] },
+        { name: "Jupiter", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Jupiter.mp3", coords: [845, 500, 950, 603] },
+        { name: "Saturn", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Saturn.mp3", coords: [979, 287, 1083, 390] },
+        { name: "Uranus", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Uranus.mp3", coords: [873, 69, 978, 171] },
+        { name: "Neptune", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Neptune.mp3", coords: [645, 37, 751, 141] },
+        { name: "Asteroids", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Asteroids.mp3", coords: [749, 778, 854, 881] },
+        { name: "Comet", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Comet.mp3", coords: [163, 51, 268, 154] },
+        { name: "Moon", audio: "https://raw.githubusercontent.com/ManuelVS8/Audios-juegos-SCIENCE/refs/heads/main/Solar_system/Moon.mp3", coords: [547, 758, 653, 861] }
+    ];
+
+    const ORIGINAL_WIDTH = 1120;
+    const ORIGINAL_HEIGHT = 928;
+
+    /* --- VARIABLES ESTADO --- */
+    let currentQuestions = [];
+    let questionIndex = 0;
+    let attempts = 0;
+    let startTime;
+    let isMuted = false;
+    let isHofLoading = false;
+    let audioUnlocked = false;
+
+    const soundSprites = {
+        correct: new Audio('https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Correcto.mp3'),
+        error: new Audio('https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Error.mp3'),
+        victory: new Audio('https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Termin%C3%A9.mp3'),
+        completed: new Audio('https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Completado.mp3'),
+        tap: new Audio('https://raw.githubusercontent.com/ManuelVS8/Efectos_audio/refs/heads/main/Tap.mp3')
+    };
+
+    /* --- FUNCIONES CONTROL --- */
+    function playSound(key) {
+        if (isMuted) return;
+        const s = soundSprites[key];
+        if (s) { s.currentTime = 0; s.play().catch(e => {}); }
+    }
+
+    function toggleSound() {
+        isMuted = !isMuted;
+        document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊';
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function unlockAudio() {
+        if (audioUnlocked) return;
+        Object.values(soundSprites).forEach(s => { s.play(); s.pause(); });
+        audioUnlocked = true;
+    }
+
+    /* --- LÓGICA JUEGO --- */
+    function initGame() {
+        currentQuestions = [...gameData].sort(() => Math.random() - 0.5);
+        questionIndex = 0;
+        attempts = 0;
+        startTime = Date.now();
+        updateProgress();
+        renderZones();
+        nextQuestion();
+    }
+
+    function renderZones() {
+        const area = document.getElementById('gameArea');
+        area.querySelectorAll('.click-zone').forEach(z => z.remove());
+
+        gameData.forEach(item => {
+            const [x1, y1, x2, y2] = item.coords;
+            const zone = document.createElement('div');
+            zone.className = 'click-zone';
+            zone.dataset.name = item.name;
+            
+            // Posicionamiento porcentual para responsive
+            zone.style.left = (x1 / ORIGINAL_WIDTH * 100) + '%';
+            zone.style.top = (y1 / ORIGINAL_HEIGHT * 100) + '%';
+            zone.style.width = ((x2 - x1) / ORIGINAL_WIDTH * 100) + '%';
+            zone.style.height = ((y2 - y1) / ORIGINAL_HEIGHT * 100) + '%';
+
+            zone.onclick = () => handleSelection(item.name, zone);
+            area.appendChild(zone);
+        });
+    }
+
+    function nextQuestion() {
+        if (questionIndex >= currentQuestions.length) {
+            finishGame();
+            return;
+        }
+        setTimeout(() => {
+            const audio = new Audio(currentQuestions[questionIndex].audio);
+            if (!isMuted) audio.play();
+        }, 500);
+    }
+
+    function handleSelection(name, element) {
+        const target = currentQuestions[questionIndex].name;
+        attempts++;
+
+        if (name === target) {
+            playSound('correct');
+            element.classList.add('correct');
+            setTimeout(() => {
+                element.classList.remove('correct');
+                questionIndex++;
+                updateProgress();
+                nextQuestion();
+            }, 200);
+        } else {
+            playSound('error');
+            element.classList.add('wrong');
+            setTimeout(() => element.classList.remove('wrong'), 200);
+        }
+    }
+
+    function updateProgress() {
+        const perc = (questionIndex / currentQuestions.length) * 100;
+        document.getElementById('progressBar').style.width = perc + '%';
+    }
+
+    function finishGame() {
+        const totalSeconds = (Date.now() - startTime) / 1000;
+        const score = Math.round((12 / attempts) * 100);
+        
+        document.getElementById('finalScore').textContent = score;
+        document.getElementById('finalTime').textContent = `Time: ${formatTime(totalSeconds)}`;
+        
+        const msgEl = document.getElementById('finalMessage');
+        const trophy = document.getElementById('trophyContainer');
+
+        if (score === 100) {
+            msgEl.textContent = "Well done, full marks!";
+            trophy.style.display = 'block';
+            playSound('victory');
+            launchConfetti();
+        } else {
+            msgEl.textContent = "Good job! Keep practising!";
+            trophy.style.display = 'none';
+            playSound('completed');
+        }
+
+        showScreen('endScreen');
+        showSubmitModal(totalSeconds, score);
+    }
+
+    /* --- HALL OF FAME & MODAL --- */
+    function formatTime(s) {
+        const mins = Math.floor(s / 60);
+        const secs = (s % 60).toFixed(1);
+        return `${mins}:${secs.padStart(4, '0')}`;
+    }
+
+    async function loadHallOfFame() {
+        if (isHofLoading) return;
+        isHofLoading = true;
+        const tbody = document.getElementById('hofTableBody');
+        tbody.innerHTML = '<tr><td colspan="4" class="hall-of-fame-loading">Cargando puntuaciones...</td></tr>';
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            
+            const resp = await fetch(`${APP_SCRIPT_URL}?action=read&sheet=${SHEET_NAME}`, { signal: controller.signal });
+            const data = await resp.json();
+            clearTimeout(timeoutId);
+
+            if (data.status === 'success' && data.data) {
+                tbody.innerHTML = '';
+                data.data.slice(0, 10).forEach((entry, idx) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${idx + 1}</td>
+                        <td>${entry.Nombre} ${entry.Apellidos}</td>
+                        <td>${entry.Puntuación}</td>
+                        <td>${formatTime(entry.Tiempo)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (e) {
+            tbody.innerHTML = '<tr><td colspan="4" class="hall-of-fame-error">Error al cargar el Hall of Fame</td></tr>';
+        } finally {
+            isHofLoading = false;
+        }
+    }
+
+    function showSubmitModal(time, score) {
+        const modal = document.getElementById('submitModal');
+        document.getElementById('modalTime').textContent = formatTime(time);
+        modal.style.display = 'flex';
+
+        document.getElementById('submitScoreBtn').onclick = () => submitScore(time, score);
+        document.getElementById('discardScoreBtn').onclick = () => modal.style.display = 'none';
+    }
+
+    async function submitScore(time, score) {
+        const name = document.getElementById('playerName').value.trim();
+        const surname = document.getElementById('playerSurname').value.trim();
+
+        if (!name || !surname) {
+            alert("Por favor, rellena nombre y apellido");
+            return;
+        }
+
+        const btn = document.getElementById('submitScoreBtn');
+        btn.textContent = "Enviando...";
+        btn.disabled = true;
+
+        const payload = {
+            sheet: SHEET_NAME,
+            action: "write",
+            data: { score, time, name, surname }
+        };
+
+        try {
+            await fetch(APP_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            setTimeout(() => {
+                document.getElementById('submitModal').style.display = 'none';
+                loadHallOfFame();
+            }, 1000);
+        } catch (e) {
+            alert("Error al enviar");
+            btn.textContent = "Enviar";
+            btn.disabled = false;
+        }
+    }
+
+    /* --- EFECTOS --- */
+    function launchConfetti() {
+        for (let i = 0; i < 50; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            const tx = (Math.random() - 0.5) * window.innerWidth;
+            c.style.left = Math.random() * 100 + 'vw';
+            c.style.top = '-10px';
+            c.style.backgroundColor = ['#ff595e','#1982c4','#6a4c93','#ffca3a','#8ac926'][Math.floor(Math.random()*5)];
+            c.style.setProperty('--tx', tx + 'px');
+            c.style.setProperty('--ty', window.innerHeight + 20 + 'px');
+            c.style.animation = `fall ${2 + Math.random()}s linear forwards`;
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 3000);
+        }
+    }
+
+    /* --- EVENTOS --- */
+    document.getElementById('playBtn').onclick = () => { 
+        unlockAudio();
+        playSound('tap'); 
+        initGame();
+        showScreen('gameScreen'); 
+    };
+
+    document.getElementById('playWordBtn').onclick = () => {
+        playSound('tap');
+        const audio = new Audio(currentQuestions[questionIndex].audio);
+        if (!isMuted) audio.play();
+    };
+
+    document.getElementById('backToMenuBtn').onclick = () => { 
+        playSound('tap'); 
+        location.reload(); 
+    };
+
+    document.getElementById('muteBtn').onclick = toggleSound;
+
+    // Carga inicial
+    window.onload = loadHallOfFame;
+
+    </script>
+</body>
+</html>
