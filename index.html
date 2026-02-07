@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
@@ -249,11 +249,12 @@
 
     </style>
 </head>
-<body>
-<div class="game-container">
+<body translate="no">
+
+<div class="game-container" translate="no">
     <button class="mute-btn" id="muteBtn" title="Silenciar/Activar sonido">🔊</button>
 
-    <section class="screen active" id="startScreen">
+    <section class="screen active" id="startScreen" translate="no">
         <header>
             <h1>The solar system</h1>
             <div class="subtitle">Identify components of the solar system: Sun, planets, satellites, comets and asteroids.</div>
@@ -321,7 +322,7 @@
         </div>
     </section>
 
-    <section class="screen" id="finalScreen">
+    <section class="screen" id="finalScreen" translate="no">
         <header>
             <h1 class="final-title">The solar system</h1>
         </header>
@@ -867,6 +868,9 @@
         const nameInput = document.getElementById('playerName');
         const surnameInput = document.getElementById('playerSurname');
         
+        // Sonido Tap al guardar
+        playSound('tap');
+
         const payload = {
             score: finalScoreVal,
             time: finalTimeVal, 
