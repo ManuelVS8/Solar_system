@@ -55,6 +55,17 @@
         .screen.active{ display:flex; }
         @keyframes fadeIn{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);} }
 
+        /* Animación Shake añadida */
+        .shake {
+            animation: doShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes doShake {
+            10%, 90% { transform: translate3d(-4px, 0, 0); }
+            20%, 80% { transform: translate3d(8px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+            40%, 60% { transform: translate3d(8px, 0, 0); }
+        }
+
         .game-info{ display:flex; gap:.6rem; align-items:center; justify-content:space-between; margin:.4rem 0 1rem; flex-wrap:wrap; }
         .timer{ font-weight:900; color:var(--blue-700); font-size:clamp(.95rem,2.3vw,1.15rem); }
         .progress-bar{ flex:1; height:10px; background:#e6f2ff; border-radius:999px; overflow:hidden; position: relative; }
@@ -720,6 +731,11 @@
             setTimeout(() => {
                 this.classList.remove('flash-red');
             }, 200);
+
+            // Animación de sacudida en la imagen/contenedor
+            imgWrap.classList.remove('shake'); // Reset por si acaso
+            void imgWrap.offsetWidth; // Trigger reflow
+            imgWrap.classList.add('shake');
         }
     }
 
@@ -869,7 +885,6 @@
         const nameInput = document.getElementById('playerName');
         const surnameInput = document.getElementById('playerSurname');
         
-        // Sonido Tap al guardar
         playSound('tap');
 
         const payload = {
